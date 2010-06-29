@@ -31,7 +31,7 @@ var DefaultBindHandler = (function() {
 
 srv.error = DefaultBindHandler("./content/404.html");
 
-srv.urls["/robots.txt"] = DefaultBindHandler("./content/robots.txt");
+srv.urls["/robots.txt"] = srv.staticFileHandler("./content/robots.txt", "text/plain");
 
 srv.urls["/"] = srv.urls["/index.html"] = DefaultBindHandler("./content/index.html", "home");
 
