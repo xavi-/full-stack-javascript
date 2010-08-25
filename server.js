@@ -1,5 +1,6 @@
 var sys = require("sys");
 var url = require("url");
+var qs = require("querystring");
 var fs = require("fs");
 var bind = require("./libraries/bind-js");
 var markdown = require("./libraries/markdown-js/lib/markdown");
@@ -34,5 +35,26 @@ srv.error = DefaultBindHandler("./content/404.html");
 srv.urls["/robots.txt"] = srv.staticFileHandler("./content/robots.txt", "text/plain");
 
 srv.urls["/"] = srv.urls["/index.html"] = DefaultBindHandler("./content/index.html");
+
+srv.urls["/subscribe"] = (function() {
+    var fd = fs.openSync("./emails.txt", "a+");
+    var thanksPage = DefaultBindHandler("./content/subscribe-thanks.html");
+    
+    return function(req, res) {
+        if(req.method === "POST" || req.method === "PUT") {
+            var post = "";
+            req.addListener("data", function(chunk) { post += chunk; });
+            req.addListener("end", function() {
+                var email = qs.parse(post)["email"];
+                
+                fs.write(fd, email + "\n", function(err, written) {
+                    sys.puts("written: " + written);
+                });
+            });
+        }
+        
+        thanksPage(req, res);
+    }
+})();
 
 srv.server.listen(8005);
