@@ -33,6 +33,6 @@ srv.error = DefaultBindHandler("./content/404.html");
 
 srv.urls["/robots.txt"] = srv.staticFileHandler("./content/robots.txt", "text/plain");
 
-srv.urls["/"] = srv.urls["/index.html"] = DefaultBindHandler("./content/index.html", "home");
+srv.urls["/"] = srv.urls["/index.html"] = DefaultBindHandler("./content/index.html");
 
 srv.server.listen(8005);
