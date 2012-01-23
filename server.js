@@ -1,9 +1,8 @@
-var sys = require("sys");
 var url = require("url");
 var qs = require("querystring");
 var fs = require("fs");
 var bind = require("./libraries/bind-js");
-var markdown = require("./libraries/markdown-js/lib/markdown");
+var markdown = require("markdown").markdown;
 var srv = require("./libraries/xavlib/simple-router");
 var chn = require("./libraries/xavlib/channel");
 
@@ -17,7 +16,7 @@ var DefaultBindHandler = (function() {
     }
     
     function bindMarkdown(callback, val) {
-        callback(markdown.renderJsonML(markdown.toHTMLTree(val,"Maruku")), {}, true); 
+        callback(markdown.toHTML(val,"Maruku"), {}, true); 
     }
 
     return function(path, extContext) {
@@ -37,7 +36,7 @@ srv.urls["/robots.txt"] = srv.staticFileHandler("./content/robots.txt", "text/pl
 srv.urls["/"] = srv.urls["/index.html"] = DefaultBindHandler("./content/index.html");
 
 srv.urls["/subscribe"] = (function() {
-    var fd = fs.openSync("./emails.txt", "a+");
+    var fd = fs.createWriteStream("./emails.txt", { flags: "a+" });
     var thanksPage = DefaultBindHandler("./content/subscribe-thanks.html");
     
     return function(req, res) {
@@ -47,9 +46,7 @@ srv.urls["/subscribe"] = (function() {
             req.addListener("end", function() {
                 var email = qs.parse(post)["email"];
                 
-                fs.write(fd, email + "\n", function(err, written) {
-                    sys.puts("written: " + written);
-                });
+                fd.write(email + "\n");
             });
         }
         
@@ -58,3 +55,4 @@ srv.urls["/subscribe"] = (function() {
 })();
 
 srv.server.listen(8005);
+console.log("Serving on port 8005...");
